@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>跑步实时指导系统</title>
+    <link rel="stylesheet" href="/static/css/tech-effects.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <div id="particles-js"></div>
+  
+  <header class="main-header">
+    <h1>跑步实时指导系统</h1>
+    <div class="system-status">系统状态: <span class="status-active">在线</span></div>
+  </header>
+  
+  <div class="dashboard-container">
+    <div class="dashboard">
+      <div class="metric-box main-visual">
+        <h2>实时数据监测</h2>
+        <div class="chart-row">
+          <div id="waveform"></div>
+          <div id="radarChart"></div>
+          <div id="heatmap"></div>
+        </div>
+        <p class="update-time">最后更新：{{ update_time }}</p>
+      </div>
+      
+      <div class="metric-box side-panel">
+        <h3>核心指标</h3>
+        <div class="metric">
+          <label>步频</label>
+          <div class="value">{{ cadence }} <span class="unit">步/分钟</span></div>
+        </div>
+        <div class="metric">
+          <label>步幅</label>
+          <div class="value">{{ stride }} <span class="unit">米</span></div>
+        </div>
+        <div class="metric">
+          <label>姿态评分</label>
+          <div class="value score-value">{{ posture_score }} <span class="unit">分</span></div>
+        </div>
+        
+        <div class="data-analysis">
+          <h4>数据分析</h4>
+          <div class="chart-row secondary-charts">
+            <div id="scoreChart"></div>
+            <div id="errorChart"></div>
+            <div id="phaseChart"></div>
+          </div>
+        </div>
+        
+        <div class="data-legend">
+          <h4>AI分析说明</h4>
+          <p>• 步态评分基于运动学参数综合计算</p>
+          <p>• 支撑相：脚掌完全接触地面阶段</p>
+          <p>• 摆动相：下肢向前摆动的空中阶段</p>
+          <div class="color-key">
+            <span class="color-normal"></span>正常范围
+            <span class="color-error"></span>异常值
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <footer class="app-footer">
+    <p>© 2024 跑步实时指导系统 | <a href="#" class="settings-toggle">设置</a></p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script>
+    // 初始化粒子动画
+    particlesJS('particles-js', {
+      particles: {
+        number: { value: 80 }, 
+        color: { value: '#00ff88' },
+        shape: { type: 'circle' },
+        opacity: { value: 0.5 },
+        size: { value: 3 },
+        move: {
+          enable: true,
+          speed: 1.5,
+          direction: 'none',
+          random: true,
+          straight: false
+        }
+      },
+      interactivity: {
+        events: {
+          onhover: {
+            enable: true,
+            mode: 'repulse'
+          }
+        }
+      }
+    });
+
+    // 图表配置和主题
+    const chartTheme = {
+      backgroundColor: 'rgba(0,0,0,0.2)',
+      textStyle: { color: '#ffffff' },
+      title: { textStyle: { color: '#00ff88' } },
+      legend: { textStyle: { color: '#ffffff' } },
+      xAxis: { axisLine: { lineStyle: { color: '#00ff88' } } },
+      yAxis: { axisLine: { lineStyle: { color: '#00ff88' } } },
+      visualMap: { textStyle: { color: '#ffffff' } },
+      tooltip: { 
+        backgroundColor: 'rgba(10,14,23,0.85)',
+        borderColor: '#00ff88',
+        textStyle: { color: '#ffffff' }
+      }
+    };
+
+    // 全局注册主题
+    echarts.registerTheme('tech-dark', chartTheme);
+    
+    // 初始化所有图表
+    function initCharts() {
+      const charts = {};
+      
+      // 主波形图
+      charts.waveform = echarts.init(document.getElementById('waveform'), 'tech-dark');
+      
+      // 其他图表
+      charts.radar = echarts.init(document.getElementById('radarChart'), 'tech-dark');
+      charts.heatmap = echarts.init(document.getElementById('heatmap'), 'tech-dark');
+      charts.score = echarts.init(document.getElementById('scoreChart'), 'tech-dark');
+      charts.error = echarts.init(document.getElementById('errorChart'), 'tech-dark');
+      charts.phase = echarts.init(document.getElementById('phaseChart'), 'tech-dark');
+      
+      // 设置响应式
+      window.addEventListener('resize', () => {
+        Object.values(charts).forEach(chart => chart.resize());
+      });
+      
+      return charts;
+    }
+    
+    // 实时数据更新
+    function fetchData(charts) {
+      fetch('/realtime-data')
+        .then(response => response.json())
+        .then(data => {
+          console.log('实时数据:', data);
+          
+          // 更新波形图
+          charts.waveform.setOption({
+            title: { text: '实时加速度波形', left: 'center' },
+            tooltip: { trigger: 'axis', formatter: '时间：{b}<br/>数值：{c} m/s²' },
+            xAxis: { type: 'time' },
+            yAxis: { name: '加速度(g)' },
+            series: [{
+              data: data.waveform || [],
+              type: 'line',
+              smooth: true,
+              name: '加速度',
+              areaStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  {offset: 0, color: 'rgba(0,255,136,0.3)'},
+                  {offset: 1, color: 'rgba(26,42,108,0.01)'}
+                ])
+              },
+              lineStyle: {
+                width: 2,
+                color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                  {offset: 0, color: '#00ff88'},
+                  {offset: 1, color: '#1a2a6c'}
+                ])
+              }
+            }]
+          });
+
+          // 更新步态雷达图
+          charts.radar.setOption({
+            title: { text: '步态相位', left: 'center' },
+            radar: {
+              indicator: [
+                {name: '支撑相', max: 1},
+                {name: '摆动相', max: 1}
+              ]
+            },
+            series: [{
+              type: 'radar',
+              data: [{
+                value: [data.gait_phase === 'stance' ? 0.8 : 0.2, data.gait_phase === 'swing' ? 0.8 : 0.2],
+                name: '步态相位',
+                areaStyle: {
+                  color: new echarts.graphic.RadialGradient(0.5, 0.5, 0.5, [
+                    {offset: 0, color: 'rgba(0,255,136,0.5)'},
+                    {offset: 1, color: 'rgba(0,255,136,0.1)'}
+                  ])
+                }
+              }]
+            }]
+          });
+
+          // 更新错误热力图
+          charts.heatmap.setOption({
+            title: { text: '步态异常检测', left: 'center' },
+            tooltip: { position: 'top' },
+            xAxis: {
+              type: 'category',
+              data: ['跨步过大', '足跟冲击', '内外八']
+            },
+            yAxis: {show: false},
+            visualMap: {
+              min: 0, 
+              max: 1,
+              calculable: true,
+              orient: 'horizontal',
+              left: 'center',
+              bottom: '0%',
+              inRange: {
+                color: ['#1a2a6c', '#00ff88']
+              }
+            },
+            series: [{
+              type: 'heatmap',
+              data: [
+                [0, 0, data.error_type === 'overstride' ? 0.8 : 0.1],
+                [1, 0, data.error_type === 'heel_strike' ? 0.8 : 0.1],
+                [2, 0, data.error_type === 'cross_over' ? 0.8 : 0.1]
+              ],
+              label: {
+                show: true,
+                formatter: function(params) {
+                  return params.data[2].toFixed(1);
+                }
+              }
+            }]
+          });
+        })
+        .catch(error => console.error('数据获取失败:', error));
+    }
+    
+    // 加载历史样本数据
+    function loadSampleData(charts) {
+      fetch('/api/sample_data')
+        .then(res => res.json())
+        .then(data => {
+          // 设置得分图表
+          charts.score.setOption({
+            title: { text: '步态评分趋势', left: 'center' },
+            xAxis: {type: 'category', data: data.imu_data.timestamps},
+            yAxis: {type: 'value', min: 0, max: 100, name: '评分'},
+            series: [{
+              name: '步态评分',
+              type: 'bar',
+              data: data.ai_analysis.gait_score,
+              itemStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  {offset: 0, color: '#00ff88'},
+                  {offset: 1, color: '#1a2a6c'}
+                ])
+              }
+            }]
+          });
+
+          // 错误类型图表
+          charts.error.setOption({
+            title: { text: '异常步态分析', left: 'center' },
+            tooltip: {
+              trigger: 'item',
+              formatter: '{a} <br/>{b}: {c}'
+            },
+            series: [{
+              name: '异常类型',
+              type: 'pie',
+              radius: '70%',
+              center: ['50%', '60%'],
+              data: data.ai_analysis.error_types.map((type, index) => {
+                const colors = ['#00ff88', '#0072ff', '#ff0066'];
+                return {
+                  value: 1,
+                  name: type,
+                  itemStyle: {color: colors[index % colors.length]}
+                }
+              }),
+              emphasis: {
+                itemStyle: {
+                  shadowBlur: 10,
+                  shadowOffsetX: 0,
+                  shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+              }
+            }]
+          });
+
+          // 步态相位图
+          charts.phase.setOption({
+            title: { text: '支撑/摆动相分析', left: 'center' },
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: { type: 'shadow' }
+            },
+            legend: {
+              data: ['支撑相', '摆动相'],
+              top: '10%'
+            },
+            xAxis: {
+              type: 'category',
+              data: ['步态1', '步态2', '步态3']
+            },
+            yAxis: {
+              type: 'value',
+              name: '百分比(%)',
+              max: 100
+            },
+            series: [
+              {
+                name: '支撑相',
+                type: 'bar',
+                stack: 'total',
+                data: data.ai_analysis.timing_analysis.stance_phase,
+                itemStyle: {color: '#00ff88'}
+              },
+              {
+                name: '摆动相',
+                type: 'bar',
+                stack: 'total',
+                data: data.ai_analysis.timing_analysis.swing_phase,
+                itemStyle: {color: '#0072ff'}
+              }
+            ]
+          });
+        })
+        .catch(error => console.error('样本数据加载失败:', error));
+    }
+    
+    // 初始化并启动应用
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化所有图表
+      const charts = initCharts();
+      
+      // 加载样本数据
+      loadSampleData(charts);
+      
+      // 设置定时获取实时数据
+      fetchData(charts); // 立即执行一次
+      setInterval(() => fetchData(charts), 1000);
+      
+      // 为图表添加交互事件
+      document.getElementById('waveform').addEventListener('mouseover', function() {
+        this.classList.add('chart-highlight');
+      });
+      document.getElementById('waveform').addEventListener('mouseout', function() {
+        this.classList.remove('chart-highlight');
+      });
+    });
+  </script>
+</body>
+</html>

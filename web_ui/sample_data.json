@@ -1,0 +1,28 @@
+{
+  "imu_data": {
+    "timestamps": ["2024-05-20T09:00:00", "2024-05-20T09:00:01", "2024-05-20T09:00:02"],
+    "acceleration": [[1.2, 0.8, 9.8], [1.5, 0.7, 9.7], [1.3, 0.6, 9.6]],
+    "gyroscope": [[0.02, 0.15, 0.08], [0.03, 0.12, 0.07], [0.025, 0.1, 0.06]]
+  },
+  "pressure": {
+    "heel": [25.3, 26.1, 24.8],
+    "forefoot": [18.2, 17.9, 18.5],
+    "midfoot": [12.1, 11.8, 12.3]
+  },
+  "ai_analysis": {
+    "annotations": {
+      "gait_phase": "当前步态相位：支撑相=脚掌完全触地阶段，摆动相=下肢向前摆动阶段",
+      "score_criteria": "评分标准：90+优秀，80-89良好，70-79需改进",
+      "error_definitions": {
+        "overstride": "跨步过大：步幅超过身高的1.2倍",
+        "heel_strike": "足跟冲击：垂直冲击力超过体重的2.5倍"
+      }
+    },
+    "gait_score": [85, 88, 82],
+    "error_types": ["overstride", "heel_strike", "asymmetry"],
+    "timing_analysis": {
+      "stance_phase": [62, 65, 60],
+      "swing_phase": [38, 35, 40]
+    }
+  }
+}

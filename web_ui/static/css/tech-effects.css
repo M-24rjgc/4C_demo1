@@ -1,0 +1,302 @@
+/* 深色科技主题基础样式 */
+:root {
+  --neon-green: #00ff88;
+  --neon-blue: #0072ff;
+  --neon-pink: #ff0066;
+  --dark-space: #0a0e17;
+  --cyber-blue: #1a2a6c;
+  --glass-bg: rgba(255,255,255,0.05);
+  --glass-border: rgba(255,255,255,0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: linear-gradient(45deg, var(--dark-space), var(--cyber-blue));
+  color: #ffffff;
+  font-family: 'Roboto', 'Segoe UI', system-ui;
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* 粒子动画背景 */
+#particles-js {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* 头部样式 */
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 3rem;
+  background: rgba(10,14,23,0.7);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.main-header h1 {
+  font-size: 1.8rem;
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: var(--neon-green);
+  text-shadow: 0 0 10px rgba(0,255,136,0.5);
+  margin: 0;
+}
+
+.system-status {
+  font-size: 0.9rem;
+  font-weight: 300;
+}
+
+.status-active {
+  color: var(--neon-green);
+  position: relative;
+}
+
+.status-active:after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--neon-green);
+  border-radius: 50%;
+  margin-left: 8px;
+  box-shadow: 0 0 8px var(--neon-green);
+  animation: pulse 2s infinite;
+}
+
+/* 仪表板容器 */
+.dashboard-container {
+  width: 90%;
+  max-width: 1600px;
+  margin: 2rem auto;
+}
+
+/* 玻璃拟态面板 */
+.dashboard {
+  display: grid;
+  grid-template-columns: 1fr 0.5fr;
+  gap: 20px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  border: 1px solid var(--glass-border);
+}
+
+/* 指标盒子 */
+.metric-box {
+  background: rgba(0,0,0,0.2);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  border: 1px solid rgba(0,255,136,0.2);
+  overflow: hidden;
+}
+
+.metric-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--neon-green), transparent);
+}
+
+.metric-box h2, .metric-box h3, .metric-box h4 {
+  color: var(--neon-green);
+  margin-bottom: 1rem;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+/* 图表行 */
+.chart-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+/* 图表容器 */
+#waveform, #radarChart, #heatmap {
+  width: 33%;
+  height: 380px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.secondary-charts #scoreChart,
+.secondary-charts #errorChart,
+.secondary-charts #phaseChart {
+  width: 33%;
+  height: 230px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+}
+
+/* 高亮图表效果 */
+.chart-highlight {
+  box-shadow: 0 0 15px rgba(0,255,136,0.4);
+  transform: translateY(-5px);
+}
+
+/* 指标样式 */
+.metric {
+  background: rgba(0,0,0,0.2);
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 3px solid var(--neon-green);
+}
+
+.metric label {
+  font-size: 1rem;
+  color: #ccc;
+}
+
+.metric .value {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.metric .unit {
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-left: 5px;
+}
+
+.score-value {
+  color: var(--neon-green);
+  text-shadow: 0 0 10px rgba(0,255,136,0.5);
+}
+
+/* 数据说明面板 */
+.data-legend {
+  background: rgba(0,0,0,0.2);
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-top: 20px;
+}
+
+.data-legend h4 {
+  margin-bottom: 10px;
+}
+
+.data-legend p {
+  color: #ccc;
+  margin-bottom: 8px;
+}
+
+.color-key {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.color-key span {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+}
+
+.color-normal {
+  background: var(--neon-green);
+}
+
+.color-error {
+  background: var(--neon-pink);
+}
+
+/* 更新时间 */
+.update-time {
+  font-size: 0.8rem;
+  color: #ccc;
+  text-align: right;
+  margin-top: 10px;
+}
+
+/* 数据分析区域 */
+.data-analysis {
+  margin: 20px 0;
+}
+
+/* 页脚 */
+.app-footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-top: 2rem;
+}
+
+.app-footer a {
+  color: var(--neon-green);
+  text-decoration: none;
+}
+
+/* 动画效果 */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+  
+  #waveform, #radarChart, #heatmap {
+    width: 100%;
+    height: 250px;
+  }
+  
+  .chart-row {
+    flex-direction: column;
+  }
+  
+  .secondary-charts #scoreChart,
+  .secondary-charts #errorChart,
+  .secondary-charts #phaseChart {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-header {
+    flex-direction: column;
+    padding: 1rem;
+  }
+  
+  .main-header h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .dashboard-container {
+    width: 95%;
+  }
+}
